@@ -1,5 +1,8 @@
 package com.example.demo.model;
 
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 public class Employee {
 	
 	private Integer employeeId;
