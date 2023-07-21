@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -40,15 +41,17 @@ public class ProductController {
 
 	}
 
-	@GetMapping("/product/{productId}")
-	public Product getProductDetail(@PathVariable Integer productId) {
-
+	@GetMapping("/product/search")
+	public List<Product> getProductSearch(@RequestParam String productName,@RequestParam String productDetail) {
+		List<Product> foundData = new ArrayList<Product>();
 		for (int i = 0; i < data.size(); i++) {
-			if (productId == data.get(i).getProductId()) {
-				return data.get(i);
+			if (data.get(i).getProductName().contains(productName)&&productName != "" || data.get(i).getProductDetail().contains(productDetail )&&productDetail !="")
+				{
+				foundData.add(data.get(i));
+				 
 			}
 		}
-		return null;
+		return foundData;
 	}
 
 	@PutMapping("/product/{productId}")
