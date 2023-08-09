@@ -1,8 +1,12 @@
 package com.example.demo.controller;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,73 +14,98 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.example.demo.model.Employee;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.example.demo.repository.EmployeeRepository;
 
 @RestController
 public class EmployeeController {
 
-	private List<Employee> data = new ArrayList<Employee>();
+	@Autowired
+	EmployeeRepository employeeRepository;
 
 	@GetMapping("/employee")
-	public List<Employee> getEmployee() {
-		return data;
+	public ResponseEntity<Object> getemployee() {
+		try {
+			List<Employee> employees = employeeRepository.findAll();
+			return new ResponseEntity<>(employees, HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>("Internal server error", HttpStatus.OK);
+			// TODO: handle exception
+		}
 	}
 
 	@PostMapping("/employee")
-	public Employee addEmployee(@RequestBody Employee body) {
-
-		for (int i = 0; i < data.size(); i++) {
-			if (data.get(i).getEmployeeId() == body.getEmployeeId()) {
-				return null;
-			}
+	public ResponseEntity<Object> addEmployee(@RequestBody Employee body) {
+		try {
+			Employee employee = employeeRepository.save(body);
+			return new ResponseEntity<>(employee, HttpStatus.CREATED);
+		} catch (Exception e) {
+			return new ResponseEntity<>("Integer server  error", HttpStatus.OK);
 		}
-
-		data.add(body);
-		return body;
-
 	}
 
 	@GetMapping("/employee/{employeeId}")
-	public Employee getEmployeeDetail(@PathVariable Integer employeeId) {
+	public ResponseEntity<Object> getEmployeeDetail(@PathVariable Integer employeeId) {
+		try {
 
-		for (int i = 0; i < data.size(); i++) {
-			if (employeeId == data.get(i).getEmployeeId()) {
-				return data.get(i);
+			Optional<Employee> employee = employeeRepository.findById(employeeId);
+			if (employee.isPresent()) {
+				return new ResponseEntity<>(employee, HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>("Employeee not found", HttpStatus.OK);
 			}
+		} catch (Exception e) {
+			return new ResponseEntity<>("Integer server  error", HttpStatus.OK);
 		}
-		return null;
 	}
 
 	@PutMapping("/employee/{employeeId}")
-	public Employee updaEmployee(@PathVariable Integer employeeId, @RequestBody Employee body) {
+	public ResponseEntity<Object> updatEmployee(@PathVariable Integer employeeId, @RequestBody Employee body) {
+		try {
+			Optional<Employee> employee = employeeRepository.findById(employeeId);
 
-		for (int i = 0; i < data.size(); i++) {
-			if (employeeId == data.get(i).getEmployeeId()) {
+			if (employee.isPresent()) {
 
-				data.get(i).setFirstName(body.getFirstName());
-				data.get(i).setLastName(body.getLastName());
-				data.get(i).setSalary(body.getSalary());
+				Employee employeeEdit = employee.get();
 
-				return data.get(i);
+				employeeEdit.setFirstName(body.getFirstName());
+				employeeEdit.setLastName(body.getLastName());
+				employeeEdit.setSalary(body.getSalary());
+				employeeEdit.setEmployeeId(body.getEmployeeId());
 
+				employeeRepository.save(employeeEdit);
+
+				return new ResponseEntity<>("DELETE SUCSESS",HttpStatus.OK);
+
+			} else {
+
+				return new ResponseEntity<>("Not found",HttpStatus.BAD_REQUEST);
 			}
+		} catch (Exception e) {
+			return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+	
 		}
-		return null;
+
 	}
 
 	@DeleteMapping("/employee/{employeeId}")
-	public String deleEmployee(@PathVariable Integer employeeId) {
-		for (int i = 0; i < data.size(); i++) {
-			if (employeeId == data.get(i).getEmployeeId()) {
-				data.remove(i);
-				
-				return "delete sucess";
-			}
-		}
+	public ResponseEntity<Object> deletEmployee(@PathVariable Integer employeeId) {
+		
+		try {
+			Optional<Employee> employee = employeeRepository.findById(employeeId);
+			
+			if (employee.isPresent()) {
+				employeeRepository.delete(employee.get());
 
-		return "emplyee not found";
+				return new ResponseEntity<>("DELETE SUCSESS",HttpStatus.OK);
+		}  else {
+			return new ResponseEntity<>("Not found",HttpStatus.BAD_REQUEST);
+		}
+			
+		} catch (Exception e) {
+			
+			return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 }
