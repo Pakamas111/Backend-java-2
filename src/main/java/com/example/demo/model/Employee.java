@@ -1,12 +1,18 @@
 package com.example.demo.model;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
+
+
+
+import com.example.demo.model.Role;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -20,6 +26,30 @@ public class Employee {
 	private String firstName;
 	private String lastName;
 	private Integer salary;
+	
+	@ManyToOne
+	@JoinColumn(name = "role_id")
+	private Role role;
+
+	public Role getRole() {
+		return role;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
+	}
+	
+	@OneToMany
+	@JoinColumn(name = "employee_id")
+	private List<Skill> skills;
+
+	public List<Skill> getSkills() {
+		return skills;
+	}
+
+	public void setSkills(List<Skill> skills) {
+		this.skills = skills;
+	}
 
 	public Integer getId() {
 		return id;

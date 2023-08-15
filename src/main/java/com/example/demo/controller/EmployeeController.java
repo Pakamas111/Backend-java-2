@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,13 +14,25 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.model.Employee;
+import com.example.demo.model.Role;
+import com.example.demo.model.Skill;
+
+
 import com.example.demo.repository.EmployeeRepository;
+import com.example.demo.repository.RoleRepository;
+import com.example.demo.repository.SkillRepository;
 
 @RestController
 public class EmployeeController {
 
 	@Autowired
 	EmployeeRepository employeeRepository;
+	
+	@Autowired
+	RoleRepository roleRepository;
+	
+	@Autowired
+	SkillRepository skillRepository;
 
 	@GetMapping("/employee")
 	public ResponseEntity<Object> getemployee() {
@@ -38,6 +49,18 @@ public class EmployeeController {
 	public ResponseEntity<Object> addEmployee(@RequestBody Employee body) {
 		try {
 			Employee employee = employeeRepository.save(body);
+			Optional<Role> role = roleRepository.findById(4);
+			body.setRole(role.get());
+			
+			
+			
+			for(Skill skill:body.getSkills()) {
+				skill.setEmployee(employee);
+			
+				skillRepository.save(skill);
+			}
+				
+			
 			return new ResponseEntity<>(employee, HttpStatus.CREATED);
 		} catch (Exception e) {
 			return new ResponseEntity<>("Integer server  error", HttpStatus.OK);
@@ -47,8 +70,10 @@ public class EmployeeController {
 	@GetMapping("/employee/{employeeId}")
 	public ResponseEntity<Object> getEmployeeDetail(@PathVariable Integer employeeId) {
 		try {
-
+			
 			Optional<Employee> employee = employeeRepository.findById(employeeId);
+			
+			
 			if (employee.isPresent()) {
 				return new ResponseEntity<>(employee, HttpStatus.OK);
 			} else {
