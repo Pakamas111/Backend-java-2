@@ -4,7 +4,7 @@ import java.util.List;
 
 
 
-import com.example.demo.model.Role;
+
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
